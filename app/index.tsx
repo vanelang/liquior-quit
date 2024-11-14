@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,23 +11,27 @@ export default function Index() {
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkFirstLaunch = async () => {
-      try {
-        const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
-        setIsFirstLaunch(hasOnboarded !== "true");
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        setIsFirstLaunch(true);
-      }
-    };
     checkFirstLaunch();
   }, []);
 
-  useEffect(() => {
-    if (isFirstLaunch === true) {
-      router.replace("/onboarding/Welcome");
+  const checkFirstLaunch = async () => {
+    try {
+      const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
+      setIsFirstLaunch(hasOnboarded !== "true");
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+      setIsFirstLaunch(true);
     }
-  }, [isFirstLaunch]);
+  };
+
+  const resetOnboarding = async () => {
+    try {
+      await AsyncStorage.multiRemove(["hasOnboarded", "addictionLevel", "quitTarget"]);
+      router.replace("/onboarding/Welcome");
+    } catch (error) {
+      console.error("Error resetting onboarding:", error);
+    }
+  };
 
   if (isFirstLaunch === null) {
     return (
@@ -41,6 +45,9 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Welcome back!</Text>
+      <TouchableOpacity style={styles.resetButton} onPress={resetOnboarding}>
+        <Text style={styles.resetButtonText}>Reset Onboarding</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -51,10 +58,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
+    gap: 20,
   },
   text: {
     color: colors.text.primary,
     fontSize: 18,
+    fontFamily: fonts.regular,
+  },
+  resetButton: {
+    backgroundColor: colors.card,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  resetButtonText: {
+    color: colors.text.secondary,
+    fontSize: 14,
     fontFamily: fonts.regular,
   },
 });

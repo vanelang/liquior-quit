@@ -1,19 +1,18 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const AVERAGE_ADDICTION_LEVEL = 45; // This would normally come from your backend
+const AVERAGE_ADDICTION_LEVEL = 45;
 
 export default function AssessmentResult() {
   const router = useRouter();
   const [addictionLevel, setAddictionLevel] = React.useState<number>(0);
 
   React.useEffect(() => {
-    // Simulate loading the addiction level
     const loadResult = async () => {
       const level = await AsyncStorage.getItem("addictionLevel");
       setAddictionLevel(Number(level) || 0);
@@ -36,7 +35,6 @@ export default function AssessmentResult() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        {/* Percentage Display */}
         <Text style={styles.percentageText}>{addictionLevel}%</Text>
 
         <Text style={styles.resultText}>
@@ -45,7 +43,6 @@ export default function AssessmentResult() {
         </Text>
         <Text style={styles.disclaimer}>* This is only an estimate.</Text>
 
-        {/* Comparison Graph */}
         <View style={styles.graphContainer}>
           <View style={styles.barContainer}>
             <View style={styles.barLabel}>
@@ -53,7 +50,7 @@ export default function AssessmentResult() {
               <MaterialCommunityIcons
                 name="emoticon-neutral"
                 size={24}
-                color={colors.text.secondary}
+                color={colors.text.primary}
               />
             </View>
             <View style={[styles.bar, { width: `${AVERAGE_ADDICTION_LEVEL}%` }]} />
@@ -65,10 +62,19 @@ export default function AssessmentResult() {
               <MaterialCommunityIcons
                 name={addictionLevel > AVERAGE_ADDICTION_LEVEL ? "emoticon-sad" : "emoticon-happy"}
                 size={24}
-                color={colors.text.secondary}
+                color={colors.text.primary}
               />
             </View>
-            <View style={[styles.bar, styles.yourBar, { width: `${addictionLevel}%` }]} />
+            <View
+              style={[
+                styles.bar,
+                styles.yourBar,
+                {
+                  width: `${addictionLevel}%`,
+                  backgroundColor: colors.accent,
+                },
+              ]}
+            />
           </View>
         </View>
 
@@ -77,7 +83,13 @@ export default function AssessmentResult() {
           completely.
         </Text>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.replace("/")}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            AsyncStorage.setItem("hasOnboarded", "true");
+            router.replace("/");
+          }}
+        >
           <Text style={styles.buttonText}>I want to quit my addiction</Text>
         </TouchableOpacity>
       </View>
@@ -88,7 +100,7 @@ export default function AssessmentResult() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.accent,
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -112,8 +124,7 @@ const styles = StyleSheet.create({
   disclaimer: {
     fontSize: 13,
     fontFamily: fonts.regular,
-    color: colors.text.primary,
-    opacity: 0.7,
+    color: colors.text.secondary,
     marginBottom: 40,
   },
   graphContainer: {
@@ -138,29 +149,28 @@ const styles = StyleSheet.create({
   },
   bar: {
     height: 40,
-    backgroundColor: "#8B0000",
+    backgroundColor: colors.card,
     borderRadius: 6,
-    opacity: 0.3,
   },
   yourBar: {
-    opacity: 1,
+    backgroundColor: colors.accent,
   },
   recoveryText: {
     fontSize: 15,
     fontFamily: fonts.regular,
-    color: colors.text.primary,
+    color: colors.text.secondary,
     textAlign: "center",
     marginBottom: 40,
   },
   button: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.accent,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 30,
+    borderRadius: 12,
     width: "100%",
   },
   buttonText: {
-    color: colors.accent,
+    color: colors.text.primary,
     fontSize: 16,
     fontFamily: fonts.bold,
     textAlign: "center",
