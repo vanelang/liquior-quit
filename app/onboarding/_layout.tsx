@@ -41,6 +41,20 @@ export default function OnboardingLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="Premium"
+        options={{
+          title: "Premium Features",
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="PremiumComparison"
+        options={{
+          title: "Compare Plans",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

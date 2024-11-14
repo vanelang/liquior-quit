@@ -83,13 +83,7 @@ export default function AssessmentResult() {
           completely.
         </Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            AsyncStorage.setItem("hasOnboarded", "true");
-            router.replace("/");
-          }}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => router.push("/onboarding/Premium")}>
           <Text style={styles.buttonText}>I want to quit my addiction</Text>
         </TouchableOpacity>
       </View>
