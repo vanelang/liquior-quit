@@ -1,15 +1,17 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 
 export default function Welcome() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
       <View style={styles.contentContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.title}>Your Path to{"\n"}Freedom</Text>
@@ -61,7 +63,7 @@ export default function Welcome() {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -73,33 +75,57 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     padding: 20,
-    paddingTop: 50,
+    paddingTop: Platform.select({
+      ios: 40,
+      android: 60, // Increased top padding for Android
+    }),
   },
   headerContainer: {
-    marginBottom: 40,
+    marginBottom: Platform.select({
+      ios: 40,
+      android: 48, // Increased margin for Android
+    }),
   },
   title: {
-    fontSize: 36,
+    fontSize: Platform.select({
+      ios: 36,
+      android: 34, // Slightly smaller on Android for better rendering
+    }),
     fontFamily: fonts.bold,
     color: colors.text.primary,
-    marginBottom: 16,
-    lineHeight: 44,
+    marginBottom: Platform.select({
+      ios: 16,
+      android: 20,
+    }),
+    lineHeight: Platform.select({
+      ios: 44,
+      android: 42,
+    }),
   },
   subtitle: {
     fontSize: 15,
     fontFamily: fonts.regular,
     color: colors.text.secondary,
-    lineHeight: 22,
+    lineHeight: Platform.select({
+      ios: 22,
+      android: 24, // Increased line height for Android
+    }),
     opacity: 0.8,
   },
   benefitsContainer: {
-    gap: 12,
+    gap: Platform.select({
+      ios: 12,
+      android: 16, // Increased gap for Android
+    }),
   },
   benefitItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.card,
-    paddingVertical: 14,
+    paddingVertical: Platform.select({
+      ios: 14,
+      android: 16,
+    }),
     paddingHorizontal: 16,
     borderRadius: 12,
   },
@@ -113,10 +139,16 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     position: "absolute",
-    bottom: 34,
+    bottom: Platform.select({
+      ios: 34,
+      android: 40, // Increased bottom padding for Android
+    }),
     left: 20,
     right: 20,
-    gap: 16,
+    gap: Platform.select({
+      ios: 16,
+      android: 20,
+    }),
   },
   supportText: {
     fontSize: 15,
@@ -127,13 +159,19 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.accent,
-    paddingVertical: 16,
+    paddingVertical: Platform.select({
+      ios: 16,
+      android: 18, // Increased padding for Android
+    }),
     borderRadius: 12,
     alignItems: "center",
   },
   buttonText: {
     color: colors.text.primary,
-    fontSize: 16,
+    fontSize: Platform.select({
+      ios: 16,
+      android: 16,
+    }),
     fontFamily: fonts.bold,
   },
 });

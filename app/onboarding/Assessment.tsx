@@ -49,27 +49,38 @@ export default function Assessment() {
   const router = useRouter();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleAnswer = async (score: number) => {
-    const newAnswers = [...answers, score];
-    setAnswers(newAnswers);
+  const handleAnswer = async (score: number, index: number) => {
+    if (isProcessing) return;
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      // Calculate addiction level
-      const totalScore = newAnswers.reduce((a, b) => a + b, 0);
-      const maxScore = questions.length * 4;
-      const percentage = Math.round((totalScore / maxScore) * 100);
+    setIsProcessing(true);
+    setSelectedOption(index);
 
-      // Save results
-      try {
-        await AsyncStorage.setItem("addictionLevel", percentage.toString());
-        router.push("/onboarding/AssessmentResult");
-      } catch (error) {
-        console.error("Error saving assessment:", error);
+    // Wait for 500ms to show the selection before moving to next question
+    setTimeout(async () => {
+      const newAnswers = [...answers, score];
+      setAnswers(newAnswers);
+
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedOption(null);
+      } else {
+        // Calculate addiction level
+        const totalScore = newAnswers.reduce((a, b) => a + b, 0);
+        const maxScore = questions.length * 4;
+        const percentage = Math.round((totalScore / maxScore) * 100);
+
+        try {
+          await AsyncStorage.setItem("addictionLevel", percentage.toString());
+          router.push("/onboarding/AssessmentResult");
+        } catch (error) {
+          console.error("Error saving assessment:", error);
+        }
       }
-    }
+      setIsProcessing(false);
+    }, 500); // Increased delay to 500ms for better visibility
   };
 
   const question = questions[currentQuestion];
@@ -96,10 +107,15 @@ export default function Assessment() {
         {question.options.map((option, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.optionButton}
-            onPress={() => handleAnswer(question.scores[index])}
+            style={[styles.optionButton, selectedOption === index && styles.optionButtonSelected]}
+            onPress={() => handleAnswer(question.scores[index], index)}
+            disabled={isProcessing}
           >
-            <Text style={styles.optionText}>{option}</Text>
+            <Text
+              style={[styles.optionText, selectedOption === index && styles.optionTextSelected]}
+            >
+              {option}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -150,10 +166,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  optionButtonSelected: {
+    borderColor: colors.accent,
+    borderWidth: 2,
+    backgroundColor: colors.card,
+  },
   optionText: {
     fontSize: 16,
     fontFamily: fonts.regular,
     color: colors.text.primary,
     textAlign: "left",
+  },
+  optionTextSelected: {
+    color: colors.accent,
+    fontFamily: fonts.bold,
   },
 });

@@ -1,11 +1,12 @@
 export const colors = {
-  background: "#1a1a1a",
-  card: "#2a2a2a",
+  background: "#121212",
+  card: "#1E1E1E",
   text: {
-    primary: "#ffffff",
-    secondary: "#9ca3af",
+    primary: "#FFFFFF",
+    secondary: "#9E9E9E",
   },
-  accent: "#4169e1",
+  accent: "#4169E1",
   success: "#4CAF50",
-  border: "#404040",
+  error: "#FF5252",
+  border: "#2C2C2C",
 };
