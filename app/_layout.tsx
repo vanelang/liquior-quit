@@ -1,11 +1,17 @@
 import { Stack } from "expo-router";
 import { colors } from "./theme/colors";
 import AppLoading from "expo-app-loading";
-import { useFonts, Poppins_400Regular, Poppins_700Bold } from "@expo-google-fonts/poppins";
+import {
+  useFonts,
+  Poppins_300Light,
+  Poppins_400Regular,
+  Poppins_700Bold,
+} from "@expo-google-fonts/poppins";
 import { fonts } from "./theme/fonts";
 
 export default function RootLayout() {
   let [fontsLoaded] = useFonts({
+    Poppins_300Light,
     Poppins_400Regular,
     Poppins_700Bold,
   });

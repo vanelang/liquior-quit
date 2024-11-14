@@ -28,10 +28,17 @@ export default function OnboardingLayout() {
         }}
       />
       <Stack.Screen
-        name="TargetSetting"
+        name="Assessment"
         options={{
-          title: "Set Your Targets",
+          title: "Addiction Assessment",
           headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="AssessmentResult"
+        options={{
+          title: "Your Results",
+          headerShown: false,
         }}
       />
     </Stack>

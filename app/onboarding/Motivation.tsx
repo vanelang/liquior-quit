@@ -6,46 +6,57 @@ import { fonts } from "../theme/fonts";
 
 type TestimonialProps = {
   quote: string;
-  author: string;
-  days?: string;
+  name: string;
+  duration: string;
+  achievement: string;
 };
 
-const Testimonial = ({ quote, author, days }: TestimonialProps) => (
+const Testimonial = ({ quote, name, duration, achievement }: TestimonialProps) => (
   <View style={styles.testimonialCard}>
     <Text style={styles.testimonialQuote}>{quote}</Text>
-    {days && <Text style={styles.daysText}>{days}</Text>}
-    <Text style={styles.testimonialAuthor}>- {author}</Text>
+    <View style={styles.testimonialFooter}>
+      <Text style={styles.durationText}>
+        {duration} • <Text style={styles.achievementText}>{achievement}</Text>
+      </Text>
+      <Text style={styles.nameText}>- {name}</Text>
+    </View>
   </View>
 );
 
 export default function Motivation() {
   const router = useRouter();
 
-  const navigateToTargetSetting = () => {
-    router.push("/onboarding/TargetSetting");
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Find Your Motivation</Text>
-        <Text style={styles.subtitle}>See how others have transformed their lives</Text>
+        <Text style={styles.subtitle}>Stories from people who took the first step</Text>
 
         <Testimonial
-          quote="I feel completely free now. I started to enjoy my life."
-          author="Robert"
+          quote="The daily reflections kept me focused on why I started. This app helped me stay accountable through the tough days."
+          name="Michael"
+          duration="180 days sober"
+          achievement="Rebuilt relationships"
         />
 
         <Testimonial
-          quote="Before, my streaks lasted a maximum of 5 days. Today is my 90th day, feel amazing."
-          author="Gareth"
-          days="90 days"
+          quote="I learned to enjoy social events without alcohol. The community here truly understands the journey."
+          name="Sarah"
+          duration="1 year alcohol-free"
+          achievement="Found new hobbies"
         />
 
-        <Testimonial quote="I felt free after the first 21 days." author="Louis" days="21 days" />
+        <Testimonial
+          quote="Started as a 30-day break. The health benefits and savings made me commit to permanent change."
+          name="David"
+          duration="2 years sober"
+          achievement="Saved $8,400"
+        />
 
-        <TouchableOpacity style={styles.button} onPress={navigateToTargetSetting}>
-          <Text style={styles.buttonText}>Start My Journey</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/onboarding/Assessment")}
+        >
+          <Text style={styles.buttonText}>Take Addiction Assessment</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -62,66 +73,56 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
-    paddingTop: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: fonts.bold,
-    color: colors.text.primary,
-    marginBottom: 10,
-    textAlign: "center",
+    paddingTop: 16,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: fonts.regular,
     color: colors.text.secondary,
-    textAlign: "center",
-    marginBottom: 30,
+    marginBottom: 20,
+    lineHeight: 22,
   },
   testimonialCard: {
     backgroundColor: colors.card,
     borderRadius: 12,
-    padding: 20,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    padding: 16,
+    marginBottom: 12,
   },
   testimonialQuote: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: fonts.regular,
     color: colors.text.primary,
-    marginBottom: 10,
-    lineHeight: 24,
+    marginBottom: 12,
+    lineHeight: 22,
   },
-  testimonialAuthor: {
-    fontSize: 14,
-    fontFamily: fonts.regular,
-    color: colors.text.secondary,
-    textAlign: "right",
+  testimonialFooter: {
+    gap: 4,
   },
-  daysText: {
-    fontSize: 14,
+  durationText: {
+    fontSize: 13,
     fontFamily: fonts.bold,
     color: colors.success,
-    marginBottom: 5,
+  },
+  achievementText: {
+    color: colors.text.secondary,
+    fontFamily: fonts.regular,
+  },
+  nameText: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.text.secondary,
+    opacity: 0.7,
   },
   button: {
     backgroundColor: colors.accent,
     paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 30,
-    marginTop: 20,
-    marginBottom: 40,
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 20,
   },
   buttonText: {
     color: colors.text.primary,
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: fonts.bold,
     textAlign: "center",
   },
