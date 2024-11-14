@@ -1,11 +1,39 @@
 import { Stack } from "expo-router";
+import { colors } from "../theme/colors";
+import { fonts } from "../theme/fonts";
 
 export default function OnboardingLayout() {
   return (
-    <Stack>
-      <Stack.Screen name="Welcome" options={{ title: "Welcome" }} />
-      <Stack.Screen name="Motivation" options={{ title: "Find Your Motivation" }} />
-      <Stack.Screen name="TargetSetting" options={{ title: "Set Your Targets" }} />
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerTintColor: colors.text.primary,
+        headerTitleStyle: {
+          color: colors.text.primary,
+          fontFamily: fonts.bold,
+        },
+        contentStyle: {
+          backgroundColor: colors.background,
+        },
+      }}
+    >
+      <Stack.Screen name="Welcome" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Motivation"
+        options={{
+          title: "Find Your Motivation",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="TargetSetting"
+        options={{
+          title: "Set Your Targets",
+          headerBackTitle: "Back",
+        }}
+      />
     </Stack>
   );
 }

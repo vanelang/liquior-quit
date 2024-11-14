@@ -1,21 +1,23 @@
-import { Text, View } from "react-native";
+import { Text, View, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { colors } from "./theme/colors";
+import { StatusBar } from "expo-status-bar";
+import { fonts } from "./theme/fonts";
 
 export default function Index() {
   const router = useRouter();
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if it's the first launch
     const checkFirstLaunch = async () => {
       try {
         const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
         setIsFirstLaunch(hasOnboarded !== "true");
       } catch (error) {
         console.error("Error checking onboarding status:", error);
-        setIsFirstLaunch(true); // Default to true in case of error
+        setIsFirstLaunch(true);
       }
     };
     checkFirstLaunch();
@@ -29,27 +31,30 @@ export default function Index() {
 
   if (isFirstLaunch === null) {
     return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text>Loading...</Text>
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <Text style={styles.text}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Welcome back! Edit app/index.tsx to edit this screen.</Text>
+    <View style={styles.container}>
+      <Text style={styles.text}>Welcome back!</Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+  text: {
+    color: colors.text.primary,
+    fontSize: 18,
+    fontFamily: fonts.regular,
+  },
+});
