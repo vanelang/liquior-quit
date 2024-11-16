@@ -57,6 +57,50 @@ export default function RootLayout() {
           presentation: "modal",
         }}
       />
+      <Stack.Screen
+        name="settings/index"
+        options={{
+          title: "Settings",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="settings/Premium"
+        options={{
+          title: "Premium Features",
+          headerBackTitle: "Back",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="settings/PremiumComparison"
+        options={{
+          title: "Compare Plans",
+          headerBackTitle: "Back",
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="settings/PrivacyPolicy"
+        options={{
+          title: "Privacy Policy",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="settings/TermsOfService"
+        options={{
+          title: "Terms of Service",
+          headerBackTitle: "Back",
+        }}
+      />
+      <Stack.Screen
+        name="settings/ConfigureBeer"
+        options={{
+          title: "Configure Drinks",
+          headerBackTitle: "Back",
+        }}
+      />
     </Stack>
   );
 }

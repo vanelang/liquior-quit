@@ -13,6 +13,9 @@ type GoalOption = {
 };
 
 const goalOptions: GoalOption[] = [
+  { days: 0.167, label: "4 hours", isPremium: false },
+  { days: 0.333, label: "8 hours", isPremium: false },
+  { days: 0.667, label: "16 hours", isPremium: false },
   { days: 1, label: "1 day", isPremium: false },
   { days: 2, label: "2 days", isPremium: false },
   { days: 3, label: "3 days", isPremium: false },
@@ -33,13 +36,12 @@ export default function SetTarget() {
   const [selectedDays, setSelectedDays] = useState<number | null>(null);
   const [currentTarget, setCurrentTarget] = useState<number | null>(null);
 
-  // Load current target when screen opens
   useEffect(() => {
     const loadCurrentTarget = async () => {
       try {
         const target = await AsyncStorage.getItem("quitTarget");
         if (target) {
-          const days = parseInt(target);
+          const days = parseFloat(target);
           setCurrentTarget(days);
           setSelectedDays(days);
         }
@@ -94,11 +96,7 @@ export default function SetTarget() {
           {goalOptions.map((goal) => (
             <TouchableOpacity
               key={goal.days}
-              style={[
-                styles.goalOption,
-                selectedDays === goal.days && styles.goalOptionSelected,
-                currentTarget === goal.days && styles.goalOptionCurrent,
-              ]}
+              style={[styles.goalOption, selectedDays === goal.days && styles.goalOptionSelected]}
               onPress={() => handleGoalSelect(goal)}
             >
               <View style={styles.goalContent}>
@@ -106,7 +104,6 @@ export default function SetTarget() {
                   style={[styles.goalText, selectedDays === goal.days && styles.goalTextSelected]}
                 >
                   {goal.label}
-                  {currentTarget === goal.days && " (Current)"}
                 </Text>
               </View>
               <MaterialCommunityIcons
@@ -179,10 +176,6 @@ const styles = StyleSheet.create({
   goalOptionSelected: {
     borderColor: colors.accent,
     borderWidth: 2,
-  },
-  goalOptionCurrent: {
-    borderColor: colors.success,
-    borderWidth: 1,
   },
   goalContent: {
     flex: 1,

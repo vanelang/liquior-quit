@@ -96,7 +96,7 @@ export default function Index() {
       }
 
       if (storedTarget) {
-        setTargetDays(parseInt(storedTarget));
+        setTargetDays(parseFloat(storedTarget));
       }
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -141,6 +141,14 @@ export default function Index() {
     }
   };
 
+  // Helper function to format target display
+  const formatTargetDisplay = (days: number) => {
+    if (days < 1) {
+      return `${Math.round(days * 24)}-hour`;
+    }
+    return `${days}-day`;
+  };
+
   if (isLoading || isFirstLaunch === null) {
     return (
       <SafeAreaView style={[styles.container, styles.loadingContainer]}>
@@ -177,8 +185,8 @@ export default function Index() {
           <MaterialCommunityIcons name="water" size={16} color={colors.accent} />
           <Text style={styles.statValue}>{(timePassed.days * 10).toFixed(0)}</Text>
         </View>
-        <TouchableOpacity style={styles.statItem}>
-          <MaterialCommunityIcons name="star" size={16} color={colors.text.secondary} />
+        <TouchableOpacity style={styles.statItem} onPress={() => router.push("/settings")}>
+          <MaterialCommunityIcons name="cog" size={16} color={colors.text.secondary} />
         </TouchableOpacity>
       </View>
 
@@ -219,7 +227,9 @@ export default function Index() {
         {/* Progress Section */}
         <View style={styles.section}>
           <View style={styles.progressHeader}>
-            <Text style={styles.progressLabel}>Try to reach your {targetDays}-day goal</Text>
+            <Text style={styles.progressLabel}>
+              Try to reach your {formatTargetDisplay(targetDays)} goal
+            </Text>
             <Text style={styles.progressPercentage}>{progress.toFixed(0)}%</Text>
           </View>
           <View style={styles.progressBar}>
@@ -248,10 +258,10 @@ export default function Index() {
           <Text style={styles.sectionTitle}>SHORTCUTS</Text>
           <View style={styles.shortcutGrid}>
             <TouchableOpacity style={styles.shortcutItem}>
-              <MaterialCommunityIcons name="clock-outline" size={20} color={colors.success} />
+              <MaterialCommunityIcons name="wallet" size={20} color={colors.success} />
               <View>
-                <Text style={styles.shortcutLabel}>SAVED TIME</Text>
-                <Text style={styles.shortcutValue}>{timePassed.days * 24} hours</Text>
+                <Text style={styles.shortcutLabel}>SAVED MONEY</Text>
+                <Text style={styles.shortcutValue}>${(timePassed.days * 15).toFixed(0)}</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.shortcutItem}>
@@ -263,7 +273,7 @@ export default function Index() {
             </TouchableOpacity>
           </View>
 
-          {/* Updated Relapse Button */}
+          {/* Relapse Button */}
           <TouchableOpacity
             style={styles.shortcutItem}
             onPress={() => {
@@ -289,11 +299,6 @@ export default function Index() {
               <Text style={styles.shortcutLabel}>Relapse</Text>
               <Text style={styles.relapseText}>Record a relapse</Text>
             </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.panicButton}>
-            <MaterialCommunityIcons name="alert" size={20} color={colors.error} />
-            <Text style={styles.panicButtonText}>Panic Button</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -412,20 +417,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.regular,
     color: colors.text.primary,
-  },
-  panicButton: {
-    flexDirection: "row",
-    gap: 12,
-    backgroundColor: colors.card,
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  panicButtonText: {
-    fontSize: 14,
-    fontFamily: fonts.bold,
-    color: colors.error,
   },
   lastSection: {
     paddingBottom: 34,

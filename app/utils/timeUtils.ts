@@ -22,8 +22,12 @@ export const calculateTimeDifference = (startDate: Date) => {
 export const calculateProgress = (startDate: Date, targetDays: number) => {
   const now = new Date();
   const diff = now.getTime() - startDate.getTime();
-  const daysPassed = diff / (1000 * 60 * 60 * 24);
-  return Math.min((daysPassed / targetDays) * 100, 100);
+
+  // Convert everything to hours for more accurate calculation
+  const hoursElapsed = diff / (1000 * 60 * 60);
+  const targetHours = targetDays * 24;
+
+  return Math.min((hoursElapsed / targetHours) * 100, 100);
 };
 
 export const formatTimeValue = (value: number) => {
