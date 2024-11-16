@@ -111,7 +111,7 @@ export default function ConfigureBeer() {
 
             <TextInput
               style={styles.input}
-              placeholder="Price per unit ($)"
+              placeholder="Price per unit (₹)"
               placeholderTextColor={colors.text.secondary}
               keyboardType="decimal-pad"
               value={beer.price}

@@ -49,7 +49,7 @@ export default function Motivation() {
           quote="Started as a 30-day break. The health benefits and savings made me commit to permanent change."
           name="David"
           duration="2 years sober"
-          achievement="Saved $8,400"
+          achievement="Saved ₹8,400"
         />
 
         <TouchableOpacity

@@ -261,7 +261,7 @@ export default function Index() {
               <MaterialCommunityIcons name="wallet" size={20} color={colors.success} />
               <View>
                 <Text style={styles.shortcutLabel}>SAVED MONEY</Text>
-                <Text style={styles.shortcutValue}>${(timePassed.days * 15).toFixed(0)}</Text>
+                <Text style={styles.shortcutValue}>₹{(timePassed.days * 15).toFixed(0)}</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.shortcutItem}>

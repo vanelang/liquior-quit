@@ -58,9 +58,9 @@ export default function PremiumComparison() {
     }
   };
 
-  const originalPrice = 4.99;
-  const discountPercentage = 60;
-  const discountedPrice = 1.99;
+  const originalPrice = 199.99;
+  const discountPercentage = 20;
+  const discountedPrice = 159.99;
 
   const features = [
     {
@@ -138,9 +138,9 @@ export default function PremiumComparison() {
 
           <View style={styles.priceContainer}>
             <View style={styles.priceWrapper}>
-              <Text style={styles.originalPrice}>${originalPrice.toFixed(2)}</Text>
+              <Text style={styles.originalPrice}>₹{originalPrice.toFixed(2)}</Text>
               <Text style={styles.priceAmount}>
-                ${discountedPrice.toFixed(2)}
+                ₹{discountedPrice.toFixed(2)}
                 <Text style={styles.priceUnit}>/month</Text>
               </Text>
             </View>
