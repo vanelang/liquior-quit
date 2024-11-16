@@ -46,6 +46,11 @@ export default function Settings() {
           title="Configure Drinks"
           onPress={() => router.push("/settings/ConfigureBeer")}
         />
+        <SettingItem
+          icon="history"
+          title="Relapse History"
+          onPress={() => router.push("/settings/RelapseHistory")}
+        />
       </View>
 
       <View style={styles.section}>

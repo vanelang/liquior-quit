@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Tabs } from "expo-router";
 import { colors } from "./theme/colors";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -9,11 +9,16 @@ import {
 } from "@expo-google-fonts/poppins";
 import { fonts } from "./theme/fonts";
 import { useEffect } from "react";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const router = useRouter();
   let [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
@@ -21,18 +26,42 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      // Hide splash screen once fonts are loaded
-      SplashScreen.hideAsync();
-    }
+    const initializeApp = async () => {
+      if (fontsLoaded) {
+        try {
+          // Check if user has completed onboarding
+          const hasOnboarded = await AsyncStorage.getItem("hasOnboarded");
+
+          // Hide splash screen
+          await SplashScreen.hideAsync();
+
+          // Navigate based on onboarding status
+          if (hasOnboarded === "true") {
+            router.replace("/");
+          } else {
+            router.replace("/onboarding/Welcome");
+          }
+        } catch (error) {
+          console.error("Error initializing app:", error);
+          router.replace("/onboarding/Welcome");
+        }
+      }
+    };
+
+    initializeApp();
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={styles.loadingText}>Loading resources...</Text>
+      </View>
+    );
   }
 
   return (
-    <Stack
+    <Tabs
       screenOptions={{
         headerStyle: {
           backgroundColor: colors.background,
@@ -42,65 +71,97 @@ export default function RootLayout() {
           color: colors.text.primary,
           fontFamily: fonts.bold,
         },
-        contentStyle: {
+        tabBarStyle: {
           backgroundColor: colors.background,
+          borderTopColor: colors.border,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.text.secondary,
+        tabBarLabelStyle: {
+          fontFamily: fonts.regular,
+          fontSize: 12,
         },
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="settings/SetTarget"
+      <Tabs.Screen
+        name="index"
         options={{
-          title: "Set Goal",
-          headerBackTitle: "Back",
-          presentation: "modal",
+          title: "Home",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="home" size={size} color={color} />
+          ),
         }}
       />
-      <Stack.Screen
+      <Tabs.Screen
         name="settings/index"
         options={{
           title: "Settings",
-          headerBackTitle: "Back",
+          headerTitle: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cog" size={size} color={color} />
+          ),
         }}
       />
-      <Stack.Screen
-        name="settings/Premium"
+      <Tabs.Screen
+        name="settings/SetTarget"
         options={{
-          title: "Premium Features",
-          headerBackTitle: "Back",
-          presentation: "modal",
+          href: null,
+          title: "Set Goal",
         }}
       />
-      <Stack.Screen
-        name="settings/PremiumComparison"
-        options={{
-          title: "Compare Plans",
-          headerBackTitle: "Back",
-          presentation: "modal",
-        }}
-      />
-      <Stack.Screen
+      <Tabs.Screen
         name="settings/PrivacyPolicy"
         options={{
+          href: null,
           title: "Privacy Policy",
-          headerBackTitle: "Back",
         }}
       />
-      <Stack.Screen
+      <Tabs.Screen
         name="settings/TermsOfService"
         options={{
+          href: null,
           title: "Terms of Service",
-          headerBackTitle: "Back",
         }}
       />
-      <Stack.Screen
+      <Tabs.Screen
         name="settings/ConfigureBeer"
         options={{
+          href: null,
           title: "Configure Drinks",
-          headerBackTitle: "Back",
         }}
       />
-    </Stack>
+      <Tabs.Screen
+        name="settings/RelapseHistory"
+        options={{
+          href: null,
+          title: "Relapse History",
+        }}
+      />
+      <Tabs.Screen
+        name="onboarding"
+        options={{
+          href: null,
+          headerShown: false,
+        }}
+      />
+    </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  loadingText: {
+    color: colors.text.primary,
+    fontSize: 16,
+  },
+});
