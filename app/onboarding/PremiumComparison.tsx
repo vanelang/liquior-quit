@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
@@ -30,6 +30,34 @@ const FeatureRow = ({ feature, isAvailable }: FeatureRowProps) => (
 
 export default function PremiumComparison() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handlePurchase = async () => {
+    try {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      Alert.alert(
+        "Coming Soon",
+        "In-app purchases will be available in the next update. For now, you can try the free version.",
+        [
+          {
+            text: "Try Free Version",
+            onPress: async () => {
+              await AsyncStorage.setItem("hasOnboarded", "true");
+              router.replace("/");
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const originalPrice = 4.99;
   const discountPercentage = 60;
   const discountedPrice = 1.99;
@@ -126,16 +154,23 @@ export default function PremiumComparison() {
       </ScrollView>
 
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.startTrialButton} onPress={() => {}}>
-          <Text style={styles.startTrialText}>Start Free Trial</Text>
+        <TouchableOpacity
+          style={[styles.startTrialButton, isLoading && styles.buttonDisabled]}
+          onPress={handlePurchase}
+          disabled={isLoading}
+        >
+          <Text style={styles.startTrialText}>
+            {isLoading ? "Processing..." : "Start 7-Day Free Trial"}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.skipButton}
-          onPress={() => {
-            AsyncStorage.setItem("hasOnboarded", "true");
+          onPress={async () => {
+            await AsyncStorage.setItem("hasOnboarded", "true");
             router.replace("/");
           }}
+          disabled={isLoading}
         >
           <Text style={styles.skipButtonText}>Continue with limited version</Text>
         </TouchableOpacity>
@@ -303,5 +338,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: fonts.regular,
     textAlign: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
 });

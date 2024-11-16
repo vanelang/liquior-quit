@@ -55,6 +55,13 @@ export default function OnboardingLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="SetTarget"
+        options={{
+          title: "Set Goal",
+          headerBackTitle: "Back",
+        }}
+      />
     </Stack>
   );
 }

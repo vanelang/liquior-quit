@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { colors } from "./theme/colors";
-import AppLoading from "expo-app-loading";
+import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
   Poppins_300Light,
@@ -8,6 +8,10 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import { fonts } from "./theme/fonts";
+import { useEffect } from "react";
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   let [fontsLoaded] = useFonts({
@@ -16,8 +20,15 @@ export default function RootLayout() {
     Poppins_700Bold,
   });
 
+  useEffect(() => {
+    if (fontsLoaded) {
+      // Hide splash screen once fonts are loaded
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   }
 
   return (
@@ -36,7 +47,16 @@ export default function RootLayout() {
         },
       }}
     >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="settings/SetTarget"
+        options={{
+          title: "Set Goal",
+          headerBackTitle: "Back",
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 }
