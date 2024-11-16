@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../theme/colors";
@@ -31,8 +31,26 @@ const goalOptions: GoalOption[] = [
 export default function SetTarget() {
   const router = useRouter();
   const [selectedDays, setSelectedDays] = useState<number | null>(null);
+  const [currentTarget, setCurrentTarget] = useState<number | null>(null);
 
-  const handleGoalSelect = async (goal: GoalOption) => {
+  // Load current target when screen opens
+  useEffect(() => {
+    const loadCurrentTarget = async () => {
+      try {
+        const target = await AsyncStorage.getItem("quitTarget");
+        if (target) {
+          const days = parseInt(target);
+          setCurrentTarget(days);
+          setSelectedDays(days);
+        }
+      } catch (error) {
+        console.error("Error loading target:", error);
+      }
+    };
+    loadCurrentTarget();
+  }, []);
+
+  const handleGoalSelect = (goal: GoalOption) => {
     if (goal.isPremium) {
       Alert.alert(
         "Premium Feature",
@@ -55,7 +73,10 @@ export default function SetTarget() {
     if (!selectedDays) return;
 
     try {
-      await AsyncStorage.setItem("quitTarget", selectedDays.toString());
+      await Promise.all([
+        AsyncStorage.setItem("quitTarget", selectedDays.toString()),
+        AsyncStorage.setItem("shouldReloadProgress", "true"),
+      ]);
       router.back();
     } catch (error) {
       console.error("Error saving target:", error);
@@ -73,7 +94,11 @@ export default function SetTarget() {
           {goalOptions.map((goal) => (
             <TouchableOpacity
               key={goal.days}
-              style={[styles.goalOption, selectedDays === goal.days && styles.goalOptionSelected]}
+              style={[
+                styles.goalOption,
+                selectedDays === goal.days && styles.goalOptionSelected,
+                currentTarget === goal.days && styles.goalOptionCurrent,
+              ]}
               onPress={() => handleGoalSelect(goal)}
             >
               <View style={styles.goalContent}>
@@ -81,6 +106,7 @@ export default function SetTarget() {
                   style={[styles.goalText, selectedDays === goal.days && styles.goalTextSelected]}
                 >
                   {goal.label}
+                  {currentTarget === goal.days && " (Current)"}
                 </Text>
               </View>
               <MaterialCommunityIcons
@@ -106,7 +132,9 @@ export default function SetTarget() {
         onPress={handleConfirm}
         disabled={!selectedDays}
       >
-        <Text style={styles.confirmButtonText}>Confirm Goal</Text>
+        <Text style={styles.confirmButtonText}>
+          {currentTarget ? "Update Goal" : "Confirm Goal"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -151,6 +179,10 @@ const styles = StyleSheet.create({
   goalOptionSelected: {
     borderColor: colors.accent,
     borderWidth: 2,
+  },
+  goalOptionCurrent: {
+    borderColor: colors.success,
+    borderWidth: 1,
   },
   goalContent: {
     flex: 1,

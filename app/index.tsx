@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   Alert,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "./theme/colors";
@@ -16,6 +16,7 @@ import { StatusBar } from "expo-status-bar";
 import { fonts } from "./theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { calculateTimeDifference, calculateProgress, formatTimeValue } from "./utils/timeUtils";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function Index() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export default function Index() {
   });
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldReload, setShouldReload] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -48,7 +50,21 @@ export default function Index() {
     };
 
     initializeApp();
-  }, []);
+  }, [shouldReload]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const checkForUpdates = async () => {
+        const shouldReloadProgress = await AsyncStorage.getItem("shouldReloadProgress");
+        if (shouldReloadProgress === "true") {
+          setShouldReload((prev) => !prev);
+          await AsyncStorage.removeItem("shouldReloadProgress");
+        }
+      };
+
+      checkForUpdates();
+    }, [])
+  );
 
   useEffect(() => {
     if (startDate) {
@@ -202,20 +218,29 @@ export default function Index() {
 
         {/* Progress Section */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>PROGRESS</Text>
-            <TouchableOpacity onPress={() => router.push("/settings/SetTarget")}>
-              <Text style={styles.sectionAction}>SET GOAL →</Text>
-            </TouchableOpacity>
+          <View style={styles.progressHeader}>
+            <Text style={styles.progressLabel}>Try to reach your {targetDays}-day goal</Text>
+            <Text style={styles.progressPercentage}>{progress.toFixed(0)}%</Text>
           </View>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
           </View>
-          <Text style={styles.progressText}>
-            {targetDays > 0
-              ? `${progress.toFixed(1)}% of ${targetDays} day goal`
-              : "Set a goal to track progress"}
-          </Text>
+          <View style={styles.progressFooter}>
+            <Text style={styles.progressMotivation}>
+              {progress < 25
+                ? "Every small step counts!"
+                : progress < 50
+                ? "You're building momentum!"
+                : progress < 75
+                ? "More than halfway there!"
+                : progress < 100
+                ? "The finish line is in sight!"
+                : "You did it! Amazing work!"}
+            </Text>
+            <TouchableOpacity onPress={() => router.push("/settings/SetTarget")}>
+              <Text style={styles.sectionAction}>SET GOAL →</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Shortcuts Section */}
@@ -320,12 +345,13 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 20,
-    gap: 16,
+    gap: 12,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 4,
   },
   sectionTitle: {
     fontSize: 13,
@@ -339,20 +365,21 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   progressBar: {
-    height: 8,
-    backgroundColor: colors.card,
-    borderRadius: 4,
+    height: 12,
+    backgroundColor: "#FFFFFF15",
+    borderRadius: 6,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    backgroundColor: colors.success,
-    borderRadius: 4,
+    backgroundColor: "#4CAF50",
+    borderRadius: 6,
   },
   progressText: {
     fontSize: 13,
     fontFamily: fonts.regular,
     color: colors.text.secondary,
+    marginTop: 8,
   },
   shortcutGrid: {
     flexDirection: "row",
@@ -429,5 +456,33 @@ const styles = StyleSheet.create({
   },
   loadingIcon: {
     opacity: 0.8,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  progressLabel: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.text.secondary,
+  },
+  progressPercentage: {
+    fontSize: 15,
+    fontFamily: fonts.bold,
+    color: colors.success,
+  },
+  progressFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  progressMotivation: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.text.secondary,
+    fontStyle: "italic",
   },
 });
