@@ -1,22 +1,24 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../theme/colors";
 import { fonts } from "../theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type SettingItemProps = {
   icon: keyof typeof MaterialCommunityIcons.glyphMap;
   title: string;
   onPress: () => void;
   showBadge?: boolean;
+  textColor?: string;
 };
 
-const SettingItem = ({ icon, title, onPress, showBadge }: SettingItemProps) => (
+const SettingItem = ({ icon, title, onPress, showBadge, textColor }: SettingItemProps) => (
   <TouchableOpacity style={styles.settingItem} onPress={onPress}>
     <View style={styles.settingItemLeft}>
-      <MaterialCommunityIcons name={icon} size={22} color={colors.text.primary} />
-      <Text style={styles.settingItemText}>{title}</Text>
+      <MaterialCommunityIcons name={icon} size={22} color={textColor || colors.text.primary} />
+      <Text style={[styles.settingItemText, textColor && { color: textColor }]}>{title}</Text>
     </View>
     <View style={styles.settingItemRight}>
       {showBadge && (
@@ -32,6 +34,32 @@ const SettingItem = ({ icon, title, onPress, showBadge }: SettingItemProps) => (
 export default function Settings() {
   const router = useRouter();
 
+  const handleResetOnboarding = () => {
+    Alert.alert(
+      "Reset Onboarding",
+      "This will reset the app to its initial state. You'll need to go through the onboarding process again. Are you sure?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+              router.replace("/onboarding/Welcome");
+            } catch (error) {
+              console.error("Error resetting app:", error);
+              Alert.alert("Error", "Could not reset the app. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
@@ -45,11 +73,6 @@ export default function Settings() {
           icon="beer"
           title="Configure Drinks"
           onPress={() => router.push("/settings/ConfigureBeer")}
-        />
-        <SettingItem
-          icon="history"
-          title="Relapse History"
-          onPress={() => router.push("/settings/RelapseHistory")}
         />
       </View>
 
@@ -75,6 +98,12 @@ export default function Settings() {
           icon="file-document-outline"
           title="Terms of Service"
           onPress={() => router.push("/settings/TermsOfService")}
+        />
+        <SettingItem
+          icon="refresh"
+          title="Reset Onboarding"
+          onPress={handleResetOnboarding}
+          textColor={colors.error}
         />
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>Version 1.0.0</Text>

@@ -7,6 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Alert,
+  Modal,
 } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
@@ -17,6 +18,12 @@ import { fonts } from "./theme/fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { calculateTimeDifference, calculateProgress, formatTimeValue } from "./utils/timeUtils";
 import { useFocusEffect } from "@react-navigation/native";
+
+type ConfiguredBeer = {
+  id: string;
+  brand: string;
+  price: string;
+};
 
 export default function Index() {
   const router = useRouter();
@@ -34,6 +41,10 @@ export default function Index() {
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [shouldReload, setShouldReload] = useState(false);
+  const [configuredBeers, setConfiguredBeers] = useState<ConfiguredBeer[]>([]);
+  const [showRelapseModal, setShowRelapseModal] = useState(false);
+  const [selectedBeer, setSelectedBeer] = useState<ConfiguredBeer | null>(null);
+  const [totalSpent, setTotalSpent] = useState(0);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -80,6 +91,27 @@ export default function Index() {
     }
   }, [startDate, targetDays]);
 
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [beersData, spentData] = await Promise.all([
+          AsyncStorage.getItem("configuredBeers"),
+          AsyncStorage.getItem("totalSpent"),
+        ]);
+
+        if (beersData) {
+          setConfiguredBeers(JSON.parse(beersData));
+        }
+        if (spentData) {
+          setTotalSpent(parseFloat(spentData));
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    };
+    loadData();
+  }, []);
+
   const loadUserData = async () => {
     try {
       const [storedStartDate, storedTarget] = await Promise.all([
@@ -114,8 +146,46 @@ export default function Index() {
   };
 
   const handleRelapse = async () => {
+    if (configuredBeers.length === 0) {
+      Alert.alert(
+        "No Drinks Configured",
+        "Please configure your drinks in settings first to track expenses accurately.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Configure Drinks",
+            onPress: () => router.push("/settings/ConfigureBeer"),
+          },
+        ]
+      );
+      return;
+    }
+
+    setShowRelapseModal(true);
+  };
+
+  const confirmRelapse = async (beer: ConfiguredBeer) => {
     try {
       const now = new Date();
+      const relapseRecord = {
+        date: now.toISOString(),
+        timestamp: now.getTime(),
+        beer: beer.brand,
+        cost: parseFloat(beer.price),
+      };
+
+      // Update total spent
+      const newTotalSpent = totalSpent + parseFloat(beer.price);
+      await AsyncStorage.setItem("totalSpent", newTotalSpent.toString());
+      setTotalSpent(newTotalSpent);
+
+      // Save relapse record
+      const history = await AsyncStorage.getItem("relapseHistory");
+      const records = history ? JSON.parse(history) : [];
+      records.push(relapseRecord);
+      await AsyncStorage.setItem("relapseHistory", JSON.stringify(records));
+
+      // Reset timer
       await AsyncStorage.setItem("sobrietyStartDate", now.toISOString());
       setStartDate(now);
 
@@ -130,6 +200,7 @@ export default function Index() {
       });
       setProgress(0);
 
+      setShowRelapseModal(false);
       Alert.alert(
         "Streak Reset",
         "Don't give up! Every new start is a step forward. You can do this.",
@@ -261,7 +332,9 @@ export default function Index() {
               <MaterialCommunityIcons name="wallet" size={20} color={colors.success} />
               <View>
                 <Text style={styles.shortcutLabel}>SAVED MONEY</Text>
-                <Text style={styles.shortcutValue}>₹{(timePassed.days * 15).toFixed(0)}</Text>
+                <Text style={styles.shortcutValue}>
+                  ₹{(timePassed.days * 15 - totalSpent).toFixed(0)}
+                </Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.shortcutItem}>
@@ -274,26 +347,7 @@ export default function Index() {
           </View>
 
           {/* Relapse Button */}
-          <TouchableOpacity
-            style={styles.shortcutItem}
-            onPress={() => {
-              Alert.alert(
-                "Record Relapse",
-                "Are you sure you want to record a relapse? This will reset your streak timer.",
-                [
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                  },
-                  {
-                    text: "Yes, Reset",
-                    onPress: handleRelapse,
-                    style: "destructive",
-                  },
-                ]
-              );
-            }}
-          >
+          <TouchableOpacity style={styles.shortcutItem} onPress={handleRelapse}>
             <MaterialCommunityIcons name="alert-circle" size={20} color={colors.error} />
             <View style={styles.relapseContainer}>
               <Text style={styles.shortcutLabel}>Relapse</Text>
@@ -302,6 +356,53 @@ export default function Index() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Add Relapse Modal */}
+      <Modal
+        visible={showRelapseModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowRelapseModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Record Relapse</Text>
+            <Text style={styles.modalSubtitle}>Select the drink consumed:</Text>
+
+            <ScrollView style={styles.beerList}>
+              {configuredBeers.map((beer) => (
+                <TouchableOpacity
+                  key={beer.id}
+                  style={[
+                    styles.beerOption,
+                    selectedBeer?.id === beer.id && styles.beerOptionSelected,
+                  ]}
+                  onPress={() => setSelectedBeer(beer)}
+                >
+                  <Text style={styles.beerName}>{beer.brand}</Text>
+                  <Text style={styles.beerPrice}>₹{beer.price}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowRelapseModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.confirmButton, !selectedBeer && styles.confirmButtonDisabled]}
+                onPress={() => selectedBeer && confirmRelapse(selectedBeer)}
+                disabled={!selectedBeer}
+              >
+                <Text style={styles.confirmButtonText}>Confirm</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -475,5 +576,89 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     color: colors.text.secondary,
     fontStyle: "italic",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: "80%",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: fonts.bold,
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 15,
+    fontFamily: fonts.regular,
+    color: colors.text.secondary,
+    marginBottom: 20,
+  },
+  beerList: {
+    maxHeight: 300,
+  },
+  beerOption: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  beerOptionSelected: {
+    borderColor: colors.accent,
+    borderWidth: 2,
+  },
+  beerName: {
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.text.primary,
+  },
+  beerPrice: {
+    fontSize: 16,
+    fontFamily: fonts.bold,
+    color: colors.text.primary,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 20,
+  },
+  cancelButton: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: colors.card,
+    alignItems: "center",
+  },
+  confirmButton: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: colors.accent,
+    alignItems: "center",
+  },
+  confirmButtonDisabled: {
+    opacity: 0.5,
+  },
+  cancelButtonText: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: fonts.bold,
+  },
+  confirmButtonText: {
+    color: colors.text.primary,
+    fontSize: 16,
+    fontFamily: fonts.bold,
   },
 });

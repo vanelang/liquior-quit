@@ -9,7 +9,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { fonts } from "./theme/fonts";
 import { useEffect } from "react";
-import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -74,15 +74,16 @@ export default function RootLayout() {
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,
-          height: 60,
-          paddingBottom: 8,
+          height: Platform.select({ ios: 88, android: 68 }), // Adjusted for safe area
           paddingTop: 8,
+          paddingBottom: Platform.select({ ios: 28, android: 8 }), // Adjusted for safe area
         },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.text.secondary,
         tabBarLabelStyle: {
           fontFamily: fonts.regular,
           fontSize: 12,
+          paddingBottom: Platform.select({ ios: 0, android: 4 }),
         },
       }}
     >
@@ -93,6 +94,16 @@ export default function RootLayout() {
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings/RelapseHistory"
+        options={{
+          title: "History",
+          headerTitle: "Relapse History",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="history" size={size} color={color} />
           ),
         }}
       />
@@ -132,13 +143,6 @@ export default function RootLayout() {
         options={{
           href: null,
           title: "Configure Drinks",
-        }}
-      />
-      <Tabs.Screen
-        name="settings/RelapseHistory"
-        options={{
-          href: null,
-          title: "Relapse History",
         }}
       />
       <Tabs.Screen

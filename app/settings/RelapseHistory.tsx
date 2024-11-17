@@ -12,6 +12,7 @@ type RelapseRecord = {
 
 export default function RelapseHistory() {
   const [relapses, setRelapses] = useState<RelapseRecord[]>([]);
+  const [longestStreak, setLongestStreak] = useState<number>(0);
 
   useEffect(() => {
     loadRelapseHistory();
@@ -22,13 +23,28 @@ export default function RelapseHistory() {
       const history = await AsyncStorage.getItem("relapseHistory");
       if (history) {
         const parsedHistory = JSON.parse(history);
-        // Sort by most recent first
         parsedHistory.sort((a: RelapseRecord, b: RelapseRecord) => b.timestamp - a.timestamp);
         setRelapses(parsedHistory);
+        calculateLongestStreak(parsedHistory);
       }
     } catch (error) {
       console.error("Error loading relapse history:", error);
     }
+  };
+
+  const calculateLongestStreak = (history: RelapseRecord[]) => {
+    if (history.length < 2) return;
+
+    let maxStreak = 0;
+    for (let i = 0; i < history.length - 1; i++) {
+      const current = new Date(history[i].date);
+      const next = new Date(history[i + 1].date);
+      const streak = Math.ceil(
+        Math.abs(current.getTime() - next.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      maxStreak = Math.max(maxStreak, streak);
+    }
+    setLongestStreak(maxStreak);
   };
 
   const formatDate = (dateString: string) => {
@@ -58,16 +74,31 @@ export default function RelapseHistory() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Relapse History</Text>
         <Text style={styles.subtitle}>
           Track your journey and learn from past experiences. Each setback is a step toward lasting
           recovery.
         </Text>
       </View>
 
+      {relapses.length > 0 && (
+        <View style={styles.statsCard}>
+          <View style={styles.statItem}>
+            <MaterialCommunityIcons name="calendar-check" size={24} color={colors.success} />
+            <Text style={styles.statValue}>{relapses.length}</Text>
+            <Text style={styles.statLabel}>Total Records</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <MaterialCommunityIcons name="trophy" size={24} color={colors.accent} />
+            <Text style={styles.statValue}>{longestStreak}</Text>
+            <Text style={styles.statLabel}>Longest Streak</Text>
+          </View>
+        </View>
+      )}
+
       {relapses.length === 0 ? (
         <View style={styles.emptyState}>
-          <MaterialCommunityIcons name="history" size={48} color={colors.text.secondary} />
+          <MaterialCommunityIcons name="history" size={64} color={colors.text.secondary} />
           <Text style={styles.emptyStateText}>No relapse history yet</Text>
           <Text style={styles.emptyStateSubtext}>
             Stay strong! Your recovery journey is just beginning.
@@ -78,10 +109,15 @@ export default function RelapseHistory() {
           {relapses.map((relapse, index) => (
             <View key={relapse.timestamp} style={styles.timelineItem}>
               <View style={styles.timelineLine} />
-              <View style={styles.timelineDot} />
+              <View style={styles.timelineDot}>
+                <MaterialCommunityIcons name="alert" size={12} color={colors.background} />
+              </View>
               <View style={styles.timelineContent}>
                 <Text style={styles.timelineDate}>{formatDate(relapse.date)}</Text>
-                <Text style={styles.timelineStreak}>{getStreakBetweenRelapses(index)}</Text>
+                <View style={styles.streakBadge}>
+                  <MaterialCommunityIcons name="timer-sand" size={14} color={colors.accent} />
+                  <Text style={styles.timelineStreak}>{getStreakBetweenRelapses(index)}</Text>
+                </View>
               </View>
             </View>
           ))}
@@ -100,18 +136,40 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 0,
   },
-  title: {
-    fontSize: 24,
-    fontFamily: fonts.bold,
-    color: colors.text.primary,
-    marginBottom: 8,
-  },
   subtitle: {
     fontSize: 15,
     fontFamily: fonts.regular,
     color: colors.text.secondary,
     marginBottom: 24,
     lineHeight: 22,
+  },
+  statsCard: {
+    margin: 20,
+    padding: 20,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+  },
+  statItem: {
+    alignItems: "center",
+    gap: 8,
+  },
+  statDivider: {
+    width: 1,
+    height: "100%",
+    backgroundColor: colors.border,
+  },
+  statValue: {
+    fontSize: 24,
+    fontFamily: fonts.bold,
+    color: colors.text.primary,
+  },
+  statLabel: {
+    fontSize: 13,
+    fontFamily: fonts.regular,
+    color: colors.text.secondary,
   },
   emptyState: {
     flex: 1,
@@ -148,26 +206,36 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   timelineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: colors.error,
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 6,
   },
   timelineContent: {
     flex: 1,
     marginLeft: 20,
     marginBottom: 20,
+    backgroundColor: colors.card,
+    padding: 16,
+    borderRadius: 12,
   },
   timelineDate: {
     fontSize: 16,
     fontFamily: fonts.bold,
     color: colors.text.primary,
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  streakBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   timelineStreak: {
     fontSize: 14,
     fontFamily: fonts.regular,
-    color: colors.text.secondary,
+    color: colors.accent,
   },
 });
