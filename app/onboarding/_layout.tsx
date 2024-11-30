@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
-import { colors } from "../theme/colors";
-import { fonts } from "../theme/fonts";
+import { colors } from "../theme/_colors";
+import { fonts } from "../theme/_fonts";
 
 export default function OnboardingLayout() {
   return (

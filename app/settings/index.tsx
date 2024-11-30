@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { colors } from "../theme/colors";
-import { fonts } from "../theme/fonts";
+import { colors } from "../theme/_colors";
+import { fonts } from "../theme/_fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -60,6 +60,46 @@ export default function Settings() {
     );
   };
 
+  const handleResetApp = () => {
+    Alert.alert(
+      "Reset App",
+      "This will delete all your data and reset the app to its initial state. This action cannot be undone. Are you sure?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              // Clear all stored data
+              await AsyncStorage.multiRemove([
+                "hasOnboarded",
+                "sobrietyStartDate",
+                "quitTarget",
+                "configuredBeers",
+                "relapseHistory",
+                "totalSpent",
+                "addictionLevel",
+              ]);
+
+              // Reset onboarding status
+              await AsyncStorage.setItem("hasOnboarded", "false");
+
+              // Navigate to onboarding
+              router.replace("/onboarding/Welcome");
+            } catch (error) {
+              console.error("Error resetting app:", error);
+              Alert.alert("Error", "Could not reset the app. Please try again.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
@@ -103,6 +143,12 @@ export default function Settings() {
           icon="refresh"
           title="Reset Onboarding"
           onPress={handleResetOnboarding}
+          textColor={colors.error}
+        />
+        <SettingItem
+          icon="delete-outline"
+          title="Reset App"
+          onPress={handleResetApp}
           textColor={colors.error}
         />
         <View style={styles.versionContainer}>

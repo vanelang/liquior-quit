@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { colors } from "../theme/colors";
-import { fonts } from "../theme/fonts";
+import { colors } from "../theme/_colors";
+import { fonts } from "../theme/_fonts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 

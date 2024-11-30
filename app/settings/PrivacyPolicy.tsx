@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { colors } from "../theme/colors";
-import { fonts } from "../theme/fonts";
+import { colors } from "../theme/_colors";
+import { fonts } from "../theme/_fonts";
 
 export default function PrivacyPolicy() {
   return (

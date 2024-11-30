@@ -12,11 +12,11 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { colors } from "./theme/colors";
+import { colors } from "./theme/_colors";
 import { StatusBar } from "expo-status-bar";
-import { fonts } from "./theme/fonts";
+import { fonts } from "./theme/_fonts";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { calculateTimeDifference, calculateProgress, formatTimeValue } from "./utils/timeUtils";
+import { calculateTimeDifference, calculateProgress, formatTimeValue } from "./utils/_timeUtils";
 import { useFocusEffect } from "@react-navigation/native";
 
 type ConfiguredBeer = {

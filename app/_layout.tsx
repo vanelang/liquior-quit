@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { colors } from "./theme/colors";
+import { colors } from "./theme/_colors";
 import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
@@ -7,7 +7,7 @@ import {
   Poppins_400Regular,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
-import { fonts } from "./theme/fonts";
+import { fonts } from "./theme/_fonts";
 import { useEffect } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -94,6 +94,16 @@ export default function RootLayout() {
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="recovery/index"
+        options={{
+          title: "Recovery",
+          headerTitle: "Recovery Tools",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="heart-pulse" size={size} color={color} />
           ),
         }}
       />
