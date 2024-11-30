@@ -75,21 +75,23 @@ export default function Settings() {
           onPress: async () => {
             try {
               // Clear all stored data
-              await AsyncStorage.multiRemove([
-                "hasOnboarded",
-                "sobrietyStartDate",
-                "quitTarget",
-                "configuredBeers",
-                "relapseHistory",
-                "totalSpent",
-                "addictionLevel",
+              await Promise.all([
+                AsyncStorage.removeItem("sobrietyStartDate"),
+                AsyncStorage.removeItem("quitTarget"),
+                AsyncStorage.removeItem("relapseHistory"),
+                AsyncStorage.removeItem("configuredBeers"),
+                AsyncStorage.removeItem("totalSpent"),
+                AsyncStorage.removeItem("hasOnboarded"),
+                AsyncStorage.removeItem("addictionLevel"),
+                AsyncStorage.removeItem("shouldReloadProgress"),
               ]);
 
-              // Reset onboarding status
-              await AsyncStorage.setItem("hasOnboarded", "false");
+              // Set a new start date
+              const now = new Date();
+              await AsyncStorage.setItem("sobrietyStartDate", now.toISOString());
 
-              // Navigate to onboarding
-              router.replace("/onboarding/Welcome");
+              // Navigate to home screen
+              router.replace("/");
             } catch (error) {
               console.error("Error resetting app:", error);
               Alert.alert("Error", "Could not reset the app. Please try again.");

@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Stack } from "expo-router";
 import { colors } from "./theme/_colors";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -11,14 +11,18 @@ import { fonts } from "./theme/_fonts";
 import { useEffect } from "react";
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
+const Tab = createBottomTabNavigator();
+
 export default function RootLayout() {
   const router = useRouter();
+  const segments = useSegments();
   let [fontsLoaded] = useFonts({
     Poppins_300Light,
     Poppins_400Regular,
@@ -60,11 +64,31 @@ export default function RootLayout() {
     );
   }
 
+  // Hide tab bar when in onboarding flow
+  const isOnboarding = segments[0] === "onboarding";
+
+  if (isOnboarding) {
+    return (
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
+        <Stack.Screen name="onboarding" />
+      </Stack>
+    );
+  }
+
   return (
-    <Tabs
+    <Tab.Navigator
       screenOptions={{
         headerStyle: {
           backgroundColor: colors.background,
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.border,
         },
         headerTintColor: colors.text.primary,
         headerTitleStyle: {
@@ -74,9 +98,9 @@ export default function RootLayout() {
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: colors.border,
-          height: Platform.select({ ios: 88, android: 68 }), // Adjusted for safe area
+          height: Platform.select({ ios: 88, android: 68 }),
           paddingTop: 8,
-          paddingBottom: Platform.select({ ios: 28, android: 8 }), // Adjusted for safe area
+          paddingBottom: Platform.select({ ios: 28, android: 8 }),
         },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.text.secondary,
@@ -87,8 +111,9 @@ export default function RootLayout() {
         },
       }}
     >
-      <Tabs.Screen
+      <Tab.Screen
         name="index"
+        component={require("./index").default}
         options={{
           title: "Home",
           headerShown: false,
@@ -97,8 +122,9 @@ export default function RootLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="recovery/index"
+      <Tab.Screen
+        name="recovery"
+        component={require("./recovery/index").default}
         options={{
           title: "Recovery",
           headerTitle: "Recovery Tools",
@@ -107,8 +133,9 @@ export default function RootLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="settings/RelapseHistory"
+      <Tab.Screen
+        name="history"
+        component={require("./settings/RelapseHistory").default}
         options={{
           title: "History",
           headerTitle: "Relapse History",
@@ -117,8 +144,9 @@ export default function RootLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="settings/index"
+      <Tab.Screen
+        name="settings"
+        component={require("./settings/index").default}
         options={{
           title: "Settings",
           headerTitle: "Settings",
@@ -127,42 +155,7 @@ export default function RootLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="settings/SetTarget"
-        options={{
-          href: null,
-          title: "Set Goal",
-        }}
-      />
-      <Tabs.Screen
-        name="settings/PrivacyPolicy"
-        options={{
-          href: null,
-          title: "Privacy Policy",
-        }}
-      />
-      <Tabs.Screen
-        name="settings/TermsOfService"
-        options={{
-          href: null,
-          title: "Terms of Service",
-        }}
-      />
-      <Tabs.Screen
-        name="settings/ConfigureBeer"
-        options={{
-          href: null,
-          title: "Configure Drinks",
-        }}
-      />
-      <Tabs.Screen
-        name="onboarding"
-        options={{
-          href: null,
-          headerShown: false,
-        }}
-      />
-    </Tabs>
+    </Tab.Navigator>
   );
 }
 
